@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic Form Generator</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.editor, .form-preview {
+  flex: 1 1 45%; /* Adjusts width proportionally */
+  border: 1px solid #ccc;
+  padding: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+  .editor, .form-preview {
+    flex: 1 1 100%; /* Full width on smaller screens */
+  }
+}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="editor">
+      <h2>JSON Schema Editor</h2>
+      <textarea id="jsonInput" rows="10" cols="50"></textarea>
+      <button id="generateForm">Generate Form</button>
+    </div>
+    <div class="form-preview">
+      <h2>Form Preview</h2>
+      <div id="formContainer"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    document.getElementById('generateForm')?.addEventListener('click', () => {
+      const jsonInput = (document.getElementById('jsonInput') as HTMLTextAreaElement).value;
+      try {
+        const schema: FormSchema = JSON.parse(jsonInput);
+        if (validateJSONSchema(schema)) {
+          renderForm(schema);
+        } else {
+          alert('Invalid JSON schema');
+        }
+      } catch (e) {
+        alert('Invalid JSON format');
+      }
+    });
+
+    function renderForm(schema) {
+      const formContainer = document.getElementById('formContainer');
+      if (!formContainer) return;
+      formContainer.innerHTML = ''; // Clear existing form
+      formContainer.innerHTML = `<h3>${schema.title}</h3>`;
+
+      schema.fields.forEach(field => {
+        const fieldElement = document.createElement('div');
+        fieldElement.innerHTML = `
+          <label>${field.label}</label>
+          ${field.type === 'select'
+            ? `<select>${field.options?.map(opt => `<option>${opt}</option>`).join('')}</select>`
+            : `<input type="${field.type}" ${field.required ? 'required' : ''}>`
+          }
+        `;
+        formContainer.appendChild(fieldElement);
+      });
+    }
+  </script>
+  <script>
+    try {
+  // Code that might throw an error
+} catch (error) {
+  console.error('Error occurred:', error);
+  alert('An error occurred. Check the console for details.');
+}
+interface FormField {
+  label: string;
+  type: 'text' | 'number' | 'email' | 'checkbox' | 'select';
+  required: boolean;
+  options?: string[]; // For select type
+}
+
+interface FormSchema {
+  title: string;
+  fields: FormField[];
+}
+
+  </script>
+</body>
+</html>
